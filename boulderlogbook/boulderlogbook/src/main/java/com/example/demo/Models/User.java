@@ -37,5 +37,7 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<Session> sessions;
 
-
+    public int getId() {
+        return userID;
+    }
 }

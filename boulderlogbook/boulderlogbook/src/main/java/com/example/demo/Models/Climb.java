@@ -37,4 +37,9 @@ public class Climb {
     )
     private List<StyleTag> styleTags;
 
+    public int getId() {
+        return climbID;
+    }
+
+    
 }
