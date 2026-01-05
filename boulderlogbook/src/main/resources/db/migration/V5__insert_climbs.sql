@@ -1,4 +1,4 @@
-INSERT INTO Climb (climb_id, location_id, date, grade, photo) VALUES
+INSERT INTO Climb (ClimbID, LocationID, date, grade, photo) VALUES
 (1, 1, '2024-06-01 00:00:00', '5C', NULL),
 (2, 1, '2024-06-01 00:00:00', '6A', NULL),
 (3, 1, '2024-06-02 00:00:00', '6A+', NULL),
