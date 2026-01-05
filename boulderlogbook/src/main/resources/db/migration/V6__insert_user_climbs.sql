@@ -1,4 +1,4 @@
-INSERT INTO UserClimb (UserID, ClimbID, attempts, AscentType, notes, duration, loggedAt) VALUES
+INSERT INTO UserClimb (UserID, ClimbID, attempts, AscentType, notes, loggedAt) VALUES
 (1, 1, 1, 'Top', NULL, NULL, '2025-12-19 00:00:00'),
 (1, 2, 1, 'Top', NULL, NULL, '2025-12-19 00:00:00'),
 (1, 3, 1, 'Top', NULL, NULL, '2025-12-19 00:00:00'),
