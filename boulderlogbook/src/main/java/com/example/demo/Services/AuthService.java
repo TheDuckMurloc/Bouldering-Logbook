@@ -1,5 +1,11 @@
 package main.java.com.example.demo.Services;
 
+import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import com.example.demo.Repositories.UserRepository;
+import com.example.demo.Auth.LoginRequest;
+import com.example.demo.Auth.LoginResponse;
 @Service
 public class AuthService {
 
