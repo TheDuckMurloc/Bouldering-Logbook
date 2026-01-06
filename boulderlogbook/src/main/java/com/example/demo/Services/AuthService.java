@@ -4,8 +4,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.example.demo.Repositories.UserRepository;
-import com.example.demo.Auth.LoginRequest;
-import com.example.demo.Auth.LoginResponse;
+import com.example.demo.DTOs.LoginRequest;
+import com.example.demo.DTOs.LoginResponse;
 @Service
 public class AuthService {
 
