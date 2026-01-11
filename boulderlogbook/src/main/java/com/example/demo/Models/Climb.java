@@ -27,14 +27,22 @@ public class Climb {
     @Column(name = "Photo")
     private String photo;
 
+    @Column(name = "is_active")
+    private boolean isActive = true;
+
     @ManyToMany
     @JoinTable(
         name = "ClimbStyleTag",
         joinColumns = @JoinColumn(name = "ClimbID"),
         inverseJoinColumns = @JoinColumn(name = "TagID")
     )
+
+
     private List<StyleTag> styleTags;
 
+    public boolean isActive() {
+        return isActive;
+    }
     public Climb() {}
 
     // Getters & Setters
@@ -55,4 +63,8 @@ public class Climb {
 
     public List<StyleTag> getStyleTags() { return styleTags; }
     public void setStyleTags(List<StyleTag> styleTags) { this.styleTags = styleTags; }
+
+    public void setActive(boolean active) {
+    isActive = active;
+}
 }

@@ -6,8 +6,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -24,46 +24,42 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getRequestURI();
-
-        return path.startsWith("/api/auth/")
-            || path.startsWith("/swagger-ui")
-            || path.startsWith("/v3/api-docs");
-    }
-
-    @Override
     protected void doFilterInternal(
         HttpServletRequest request,
         HttpServletResponse response,
         FilterChain filterChain
     ) throws ServletException, IOException {
 
-        String authHeader = request.getHeader("Authorization");
+        String header = request.getHeader("Authorization");
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+        if (header != null && header.startsWith("Bearer ")) {
+            String token = header.substring(7);
 
-        String token = authHeader.substring(7);
+            try {
+                Long userId = jwtService.extractUserId(token);
+                String role = jwtService.extractRole(token);
 
-        try {
-            Long userId = jwtService.extractUserId(token);
+                System.out.println("JWT ROLE = " + role);
+                System.out.println("AUTHORITY = ROLE_" + role);
+                System.out.println("REQUEST URI = " + request.getRequestURI());
 
-            UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(
+                var authority = new SimpleGrantedAuthority("ROLE_" + role);
+
+                var auth = new UsernamePasswordAuthenticationToken(
                     userId,
                     null,
-                    List.of()
+                    List.of(authority)
                 );
 
-            SecurityContextHolder
-                .getContext()
-                .setAuthentication(authentication);
+                SecurityContextHolder.getContext().setAuthentication(auth);
 
-        } catch (Exception ignored) {}
+            } catch (Exception e) {
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                return;
+            }
+        }
 
         filterChain.doFilter(request, response);
     }
 }
+

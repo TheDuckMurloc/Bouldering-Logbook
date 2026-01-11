@@ -1,81 +1,114 @@
 package com.example.demo.Services;
 
-import com.example.demo.DTOs.ClimbDTO;
-import com.example.demo.Models.Climb;
-import com.example.demo.Models.UserClimb;
-import com.example.demo.Repositories.ClimbRepository;
-import com.example.demo.Repositories.UserClimbRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import com.example.demo.DTOs.ClimbDTO;
+import com.example.demo.Models.Climb;
+import com.example.demo.Models.Location;
+import com.example.demo.Models.StyleTag;
+import com.example.demo.Models.UserClimb;
+import com.example.demo.Repositories.ClimbRepository;
+import com.example.demo.Repositories.LocationRepository;
+import com.example.demo.Repositories.StyleTagRepository;
+import com.example.demo.Repositories.UserClimbRepository;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service
 public class ClimbService {
 
     private final ClimbRepository climbRepository;
+    private final LocationRepository locationRepository;
     private final UserClimbRepository userClimbRepository;
+    private final StyleTagRepository styleTagRepository;
 
     @Autowired
-    public ClimbService(ClimbRepository climbRepository, UserClimbRepository userClimbRepository) {
+    public ClimbService(
+        ClimbRepository climbRepository,
+        LocationRepository locationRepository,
+        UserClimbRepository userClimbRepository,
+        StyleTagRepository styleTagRepository
+    ) {
         this.climbRepository = climbRepository;
+        this.locationRepository = locationRepository;
         this.userClimbRepository = userClimbRepository;
+        this.styleTagRepository = styleTagRepository;
     }
 
-    // Haal alle climbs en map naar DTO
     public List<ClimbDTO> getAllClimbs() {
         return climbRepository.findAll()
-                .stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
+            .stream()
+            .map(this::toDTO)
+            .collect(Collectors.toList());
     }
 
-    // Haal climb op ID en map naar DTO
     public ClimbDTO getClimbById(int id) {
         return climbRepository.findById(id)
-                .map(this::toDTO)
-                .orElse(null);
+            .map(this::toDTO)
+            .orElse(null);
     }
 
-    // Maak nieuwe climb aan
-    public ClimbDTO createClimb(ClimbDTO climbDTO) {
+    public Climb createClimb(String grade, int locationId, List<Integer> tagIds) {
+
+        Location location = locationRepository.findById(locationId)
+            .orElseThrow(() -> new RuntimeException("Location not found"));
+
+        List<StyleTag> tags =
+            (tagIds == null || tagIds.isEmpty())
+                ? List.of()
+                : styleTagRepository.findAllById(tagIds);
+
         Climb climb = new Climb();
-        climb.setGrade(climbDTO.getGrade());
-        climb.setDate(climbDTO.getDate());
-        climb.setPhoto(climbDTO.getPhoto());
-        Climb saved = climbRepository.save(climb);
-        return toDTO(saved);
+        climb.setGrade(grade);
+        climb.setDate(new Date());
+        climb.setLocation(location);
+        climb.setStyleTags(tags); 
+
+        return climbRepository.save(climb);
     }
 
-    // Haal alle climbs van een specifieke user
     public List<ClimbDTO> getClimbsByUser(int userId) {
-        List<UserClimb> userClimbs = userClimbRepository.findByUser_UserID(userId);
+        List<UserClimb> userClimbs =
+            userClimbRepository.findByUser_UserID(userId);
 
         return userClimbs.stream()
-                .map(UserClimb::getClimb)
-                .map(this::toDTO)
-                .collect(Collectors.toList());
+            .map(UserClimb::getClimb)
+            .map(this::toDTO)
+            .collect(Collectors.toList());
     }
 
-    // Verwijder climb
-    public void deleteClimb(int id) {
-        climbRepository.deleteById(id);
+    public List<Climb> getActiveClimbsByLocationId(int locationId) {
+    return climbRepository.findByLocation_LocationIDAndIsActiveTrue(locationId);
     }
 
-    // Helper method om entity naar DTO te mappen
     private ClimbDTO toDTO(Climb climb) {
         return new ClimbDTO(
-                climb.getId(),
-                climb.getGrade(),
-                climb.getDate(),
-                climb.getPhoto(),
-                climb.getLocation() != null ? climb.getLocation().getName() : null
+            climb.getId(),
+            climb.getGrade(),
+            climb.getDate(),
+            climb.getPhoto(),
+            climb.getLocation() != null
+                ? climb.getLocation().getName()
+                : null,
+            climb.isActive()
         );
+
     }
 
-    public List<Climb> getClimbsByLocationId(int locationId) {
-        return climbRepository.findByLocation_LocationID(locationId);
+
+    public void deactivateClimb(int id) {
+    Climb climb = climbRepository.findById(id)
+        .orElseThrow(() -> new RuntimeException("Climb not found"));
+
+    if (!climb.isActive()) {
+        return;
     }
-    
+
+    climb.setActive(false);
+    climbRepository.save(climb);
+}
+
 }

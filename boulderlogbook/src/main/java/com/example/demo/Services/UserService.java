@@ -1,12 +1,16 @@
 package com.example.demo.Services;
+
 import com.example.demo.DTOs.UserDTO;
 import com.example.demo.Models.User;
 import com.example.demo.Models.UserClimb;
 import com.example.demo.Repositories.UserRepository;
 import com.example.demo.Repositories.UserClimbRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,7 +23,11 @@ public class UserService {
     @Autowired
     private UserClimbRepository userClimbRepository;
 
-    // Bestaande methodes
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    // USERS
+
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
@@ -29,6 +37,19 @@ public class UserService {
     }
 
     public User createUser(User user) {
+
+        user.setPasswordHash(
+            passwordEncoder.encode(user.getPasswordHash())
+        );
+
+        if (user.getJoinDate() == null) {
+            user.setJoinDate(new Date());
+        }
+
+        if (user.getRole() == null) {
+            user.setRole("CLIMBER");
+        }
+
         return userRepository.save(user);
     }
 
@@ -40,13 +61,20 @@ public class UserService {
         return userRepository.findByName(name);
     }
 
-    // Nieuwe methodes voor UserClimb
+    // USER CLIMBS
+
     public List<UserClimb> getUserClimbs(int userId) {
         return userClimbRepository.findByUser_UserID(userId);
     }
-    public Optional<UserDTO> getUserDtoById(int userId) {
-    return userRepository.findById(userId)
-            .map(user -> new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getProfilePhoto(), user.getJoinDate()));
-}
 
+    public Optional<UserDTO> getUserDtoById(int userId) {
+        return userRepository.findById(userId)
+            .map(user -> new UserDTO(
+                user.getUserId(),
+                user.getName(),
+                user.getEmail(),
+                user.getProfilePhoto(),
+                user.getJoinDate()
+            ));
+    }
 }

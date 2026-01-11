@@ -1,8 +1,7 @@
 package com.example.demo.Models;
+
 import jakarta.persistence.*;
 import java.time.LocalDate;
-
-import org.springframework.cglib.core.Local;
 
 @Entity
 @Table(name = "UserClimb")
@@ -21,7 +20,6 @@ public class UserClimb {
     @JoinColumn(name = "ClimbID")
     private Climb climb;
 
-
     private Integer attempts;
 
     @Column(length = 1000)
@@ -29,18 +27,26 @@ public class UserClimb {
 
     private LocalDate loggedAt;
 
-    private String AscentType;
+    @Column(name = "AscentType")
+    private String ascentType;
 
     public UserClimb() {}
 
-    public UserClimb(User user, Climb climb, LocalDate loggedAt, Integer attempts, String notes, String AscentType) {
-        this.id = new UserClimbId(user.getId(), climb.getId());
+    public UserClimb(
+        User user,
+        Climb climb,
+        LocalDate loggedAt,
+        Integer attempts,
+        String notes,
+        String ascentType
+    ) {
+        this.id = new UserClimbId(user.getUserId(), climb.getId());
         this.user = user;
         this.climb = climb;
         this.loggedAt = LocalDate.now();
         this.attempts = attempts;
-        this.AscentType = AscentType;
         this.notes = notes;
+        this.ascentType = ascentType;
     }
 
     public UserClimbId getId() {
@@ -54,21 +60,21 @@ public class UserClimb {
     public Climb getClimb() {
         return climb;
     }
-    
-    public void setAttempts(Integer attempts) {
-        this.attempts = attempts;
-    }
 
     public Integer getAttempts() {
         return attempts;
     }
 
-    public void setLoggedAt(LocalDate loggedAt) {
-        this.loggedAt = loggedAt;
+    public void setAttempts(Integer attempts) {
+        this.attempts = attempts;
     }
 
     public LocalDate getLoggedAt() {
-    return loggedAt;
+        return loggedAt;
+    }
+
+    public void setLoggedAt(LocalDate loggedAt) {
+        this.loggedAt = loggedAt;
     }
 
     public String getNotes() {
@@ -80,10 +86,14 @@ public class UserClimb {
     }
 
     public String getAscentType() {
-        return AscentType;
+        return ascentType;
     }
 
     public void setAscentType(String ascentType) {
-        AscentType = ascentType;
+        this.ascentType = ascentType;
+    }
+
+    public void setClimb(Climb climb) {
+        this.climb = climb;
     }
 }

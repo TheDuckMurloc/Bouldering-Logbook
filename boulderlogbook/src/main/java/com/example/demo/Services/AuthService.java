@@ -25,18 +25,21 @@ public class AuthService {
     }
 
    public LoginResponse login(LoginRequest request) {
+
     User user = userRepository.findByEmail(request.getEmail())
         .orElseThrow(() -> new RuntimeException("Invalid Email"));
 
-    if (!passwordEncoder.matches(request.getPasswordHash(), user.getPasswordHash())) {
+    if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
         throw new RuntimeException("Invalid Password");
     }
 
-    Long userId = Long.valueOf(user.getId());
+    Long userId = Long.valueOf(user.getUserId());
+    String role = user.getRole().toUpperCase();
 
-    String token = jwtService.generateToken(userId);
+    String token = jwtService.generateToken(userId, role);
     return new LoginResponse(token, userId);
 }
+
 }
 
 

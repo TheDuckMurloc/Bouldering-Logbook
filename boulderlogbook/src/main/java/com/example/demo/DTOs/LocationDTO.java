@@ -29,4 +29,20 @@ public class LocationDTO {
     public String getAddress() {
         return address;
     }
+
+        public void setLocationId(int id) {
+        this.id = id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
 }

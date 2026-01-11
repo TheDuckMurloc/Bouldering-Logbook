@@ -9,13 +9,16 @@ public class ClimbDTO {
     private Date date;
     private String photo;
     private String location; // naam van de locatie
+    private boolean active;
 
-    public ClimbDTO(int id, String grade, Date date, String photo, String location) {
+
+    public ClimbDTO(int id, String grade, Date date, String photo, String location, boolean active) {
         this.id = id;
         this.grade = grade;
         this.date = date;
         this.photo = photo;
         this.location = location;
+        this.active = active;
     }
 
     // Getters & Setters

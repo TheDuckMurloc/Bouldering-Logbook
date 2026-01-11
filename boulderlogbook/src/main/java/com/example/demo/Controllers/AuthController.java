@@ -12,7 +12,7 @@ import com.example.demo.DTOs.LoginResponse;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "https://bouldering-logbook-user-frontend.onrender.com")
+@CrossOrigin(origins = {"https://bouldering-logbook-user-frontend.onrender.com", "http://localhost:5173"})
 public class AuthController {
 
     private final AuthService authService;
@@ -23,6 +23,8 @@ public class AuthController {
 
     @PostMapping("/login")
     public LoginResponse login(@RequestBody LoginRequest request) {
+    System.out.println("EMAIL = " + request.getEmail());
+    System.out.println("PASSWORD = " + request.getPassword());
         return authService.login(request);
     }
 }

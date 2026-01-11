@@ -4,13 +4,17 @@ import com.example.demo.DTOs.UserDTO;
 import com.example.demo.Models.User;
 import com.example.demo.Models.UserClimb;
 import com.example.demo.Services.UserService;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
-@CrossOrigin(origins = "https://bouldering-logbook-user-frontend.onrender.com")
+@CrossOrigin(origins = {
+    "https://bouldering-logbook-user-frontend.onrender.com",
+    "http://localhost:5173"
+})
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -19,39 +23,44 @@ public class UserController {
     private UserService userService;
 
     @GetMapping
-    public List<User> getAllUsers() {
-        return userService.getAllUsers();
+    public ResponseEntity<List<User>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
     }
 
     @GetMapping("/{id}")
-    public Optional<User> getUserById(@PathVariable int id) {
-        return userService.getUserById(id);
+    public ResponseEntity<User> getUserById(@PathVariable int id) {
+        return userService.getUserById(id)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping
-    public User createUser(@RequestBody User user) {
-        return userService.createUser(user);
+    @PostMapping("/register")
+    public ResponseEntity<User> registerUser(@RequestBody User user) {
+        return ResponseEntity.ok(userService.createUser(user));
     }
 
     @DeleteMapping("/{id}")
-    public void deleteUser(@PathVariable int id) {
+    public ResponseEntity<Void> deleteUser(@PathVariable int id) {
         userService.deleteUser(id);
+        return ResponseEntity.ok().build();
     }
 
-      @GetMapping("/name")
-    public Optional<User> getUserByName(@RequestParam String name) {
-        return userService.getUserByName(name);
+    @GetMapping("/name")
+    public ResponseEntity<User> getUserByName(@RequestParam String name) {
+        return userService.getUserByName(name)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
     }
 
-     @GetMapping("/{userId}/climbs")
-    public List<UserClimb> getUserClimbs(@PathVariable int userId) {
-        return userService.getUserClimbs(userId);
+    @GetMapping("/{userId}/climbs")
+    public ResponseEntity<List<UserClimb>> getUserClimbs(@PathVariable int userId) {
+        return ResponseEntity.ok(userService.getUserClimbs(userId));
     }
+
     @GetMapping("/{userId}/dto")
-    public UserDTO getUserDto(@PathVariable int userId) {
-        return userService.getUserById(userId)
-            .map(user -> new UserDTO(user.getId(), user.getName(), user.getEmail(), user.getProfilePhoto(), user.getJoinDate()))
-            .orElseThrow(() -> new RuntimeException("User not found"));
+    public ResponseEntity<UserDTO> getUserDto(@PathVariable int userId) {
+        return userService.getUserDtoById(userId)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
     }
-
 }

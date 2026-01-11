@@ -39,4 +39,13 @@ public class LocationService {
                 ))
                 .orElse(null);
     }
+
+    public Location create(LocationDTO dto) {
+        Location location = new Location();
+        location.setName(dto.getName());
+        location.setRegion(dto.getRegion());
+        location.setAddress(dto.getAddress());
+
+        return locationRepository.save(location);
+    }
 }

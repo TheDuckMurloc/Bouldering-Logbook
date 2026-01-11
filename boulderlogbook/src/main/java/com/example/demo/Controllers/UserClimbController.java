@@ -1,60 +1,69 @@
 package com.example.demo.Controllers;
 
+import com.example.demo.DTOs.LogUserClimbDTO;
 import com.example.demo.Models.UserClimb;
 import com.example.demo.Services.UserClimbService;
-
-import java.util.List;
+import com.example.demo.Services.GoalService;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/user-climbs")
-@CrossOrigin(origins = "https://bouldering-logbook-user-frontend.onrender.com")
+@CrossOrigin(origins = {
+    "https://bouldering-logbook-user-frontend.onrender.com",
+    "http://localhost:5173"
+})
 public class UserClimbController {
 
     private final UserClimbService userClimbService;
+    private final GoalService goalService;
 
-    public UserClimbController(UserClimbService userClimbService) {
+    public UserClimbController(
+            UserClimbService userClimbService,
+            GoalService goalService
+    ) {
         this.userClimbService = userClimbService;
+        this.goalService = goalService;
     }
 
     @PostMapping("/log")
     public ResponseEntity<UserClimb> logBoulder(
             Authentication authentication,
-            @RequestParam("climbId") int climbId,
-            @RequestParam(value = "attempts", required = false) Integer attempts,
-            @RequestParam(value = "notes", required = false) String notes,
-            @RequestParam(value = "AscentType", required = false) String AscentType
+            @RequestBody LogUserClimbDTO dto
     ) {
-        try {
-            int userId = (int) authentication.getPrincipal();
-
-            UserClimb userClimb =
-                userClimbService.logBoulder(
-                    userId,
-                    climbId,
-                    attempts,
-                    notes,
-                    AscentType
-                );
-
-            return ResponseEntity.ok(userClimb);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(null);
+        if (authentication == null || authentication.getPrincipal() == null) {
+            return ResponseEntity.status(401).build();
         }
+
+        int userId = Integer.parseInt(authentication.getPrincipal().toString());
+
+        UserClimb userClimb =
+            userClimbService.logBoulder(
+                userId,
+                dto.getClimbId(),
+                dto.getAttempts(),
+                dto.getNotes(),
+                dto.getAscentType()
+            );
+
+        goalService.handleClimbLogged(
+            userId,
+            userClimb.getClimb().getGrade()
+        );
+
+        return ResponseEntity.ok(userClimb);
     }
 
-    @GetMapping("/user")
+    @GetMapping("/user/{userId}")
     public ResponseEntity<List<UserClimb>> findByUser_UserID(
-            Authentication authentication
+            @PathVariable int userId
     ) {
-        int userId = (int) authentication.getPrincipal();
-
-        List<UserClimb> climbs =
-            userClimbService.getUserClimbsByUserId(userId);
-
-        return ResponseEntity.ok(climbs);
+        return ResponseEntity.ok(
+            userClimbService.getUserClimbsByUserId(userId)
+        );
     }
 }
