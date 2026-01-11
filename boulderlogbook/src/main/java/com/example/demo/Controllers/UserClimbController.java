@@ -68,18 +68,26 @@ public class UserClimbController {
     
    @GetMapping("/me")
 public ResponseEntity<List<UserClimb>> getMyClimbs(Authentication authentication) {
+
+    System.out.println("---- CONTROLLER /me ----");
+    System.out.println("AUTH OBJECT: " + authentication);
+
+    if (authentication != null) {
+        System.out.println("AUTH NAME: " + authentication.getName());
+        System.out.println("AUTH PRINCIPAL: " + authentication.getPrincipal());
+        System.out.println("AUTH AUTHORITIES: " + authentication.getAuthorities());
+    }
+
     if (authentication == null) {
-        logger.debug("getMyClimbs called without authentication");
+        System.out.println("AUTH IS NULL");
         return ResponseEntity.status(401).build();
     }
 
-    logger.debug("getMyClimbs called by name={} principal={}", authentication.getName(), authentication.getPrincipal());
-
     int userId = Integer.parseInt(authentication.getName());
-
     return ResponseEntity.ok(
         userClimbService.getUserClimbsByUserId(userId)
     );
 }
+
 
 }
