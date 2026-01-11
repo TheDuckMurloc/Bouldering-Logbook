@@ -30,6 +30,8 @@ public class UserClimbController {
         this.goalService = goalService;
     }
 
+    
+
     @PostMapping("/log")
     public ResponseEntity<UserClimb> logBoulder(
             Authentication authentication,
@@ -57,11 +59,15 @@ public class UserClimbController {
 
         return ResponseEntity.ok(userClimb);
     }
+    
+    @GetMapping("/me")
+    public ResponseEntity<List<UserClimb>> getMyClimbs(Authentication authentication) {
+        if (authentication == null || authentication.getPrincipal() == null) {
+            return ResponseEntity.status(401).build();
+        }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<UserClimb>> findByUser_UserID(
-            @PathVariable int userId
-    ) {
+        int userId = Integer.parseInt(authentication.getPrincipal().toString());
+
         return ResponseEntity.ok(
             userClimbService.getUserClimbsByUserId(userId)
         );
