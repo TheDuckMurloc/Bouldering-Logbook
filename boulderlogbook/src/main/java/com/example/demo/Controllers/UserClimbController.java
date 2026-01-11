@@ -62,15 +62,16 @@ public class UserClimbController {
     
    @GetMapping("/me")
 public ResponseEntity<List<UserClimb>> getMyClimbs(Authentication authentication) {
-    if (authentication == null) {
+    if (authentication == null || authentication.getPrincipal() == null) {
         return ResponseEntity.status(401).build();
     }
 
-    int userId = Integer.parseInt(authentication.getName());
+    Long userId = (Long) authentication.getPrincipal();
 
     return ResponseEntity.ok(
-        userClimbService.getUserClimbsByUserId(userId)
+        userClimbService.getUserClimbsByUserId(userId.intValue())
     );
 }
+
 
 }
